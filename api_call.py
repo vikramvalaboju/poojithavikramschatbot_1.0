@@ -80,7 +80,7 @@ def has_slots_available(data):
 
 # ================= FORMAT MESSAGE =================
 
-def format_slots(data):
+def format_slots(data, only_available=False):
     try:
         if needs_login_or_refill(data):
             return "login and check for refill entires count"
@@ -97,14 +97,18 @@ def format_slots(data):
         for slot in slot_details:
             created_on = slot.get("createdon")
             location = slot.get("visa_location")
-            slots_available = slot.get("slots", 0)
+            slots_available = int(slot.get("slots", 0))
+            available_date = slot.get("start_date", "N/A")
+
+            if only_available and slots_available <= 0:
+                continue
 
             utc_time = datetime.strptime(created_on, "%a, %d %b %Y %H:%M:%S GMT")
             utc_time = utc_time.replace(tzinfo=pytz.utc)
 
             est_time = utc_time.astimezone(pytz.timezone("US/Eastern"))
             ist_time = utc_time.astimezone(pytz.timezone("Asia/Kolkata"))
-            available_date = slot.get("start_date", "N/A")
+
             msg += (
                 f"📍 {location}\n"
                 f"Slots Available: {slots_available}\n"
@@ -112,7 +116,7 @@ def format_slots(data):
                 f"Snapshot EST: {est_time.strftime('%Y-%m-%d %I:%M:%S %p')}\n"
                 f"Snapshot IST: {ist_time.strftime('%Y-%m-%d %I:%M:%S %p')}\n\n"
             )
-        
+
         msg += "Usage Summary\n"
         msg += f"Remaining: {activity.get('remaining')}\n"
         msg += f"Retrieve: {activity.get('retrieve')}\n"
@@ -126,9 +130,9 @@ def format_slots(data):
 
 # ================= COMMON CHECK =================
 
-def run_check():
+def run_check(only_available=False):
     data = fetch_slots()
-    message = format_slots(data)
+    message = format_slots(data, only_available=only_available)
 
     if len(message) > 4000:
         message = message[:4000] + "\n\n...response trimmed"
@@ -170,6 +174,7 @@ def auto_check_loop():
                 print("Login/refill message sent.", flush=True)
 
             elif has_slots_available(data):
+                message = format_slots(data, only_available=True)
                 send_telegram_direct("🚨 Slot Available!\n\n" + message)
                 print("Slot available. Telegram alert sent.", flush=True)
 
