@@ -191,10 +191,31 @@ def auto_check_loop():
 # ================= TELEGRAM HANDLERS =================
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_chat.type == "private":
+        await update.message.reply_text("This bot is now active only in the group.")
+        return
+
     await update.message.reply_text(
-        "Bot started.\n\nSend only 'check' to check slots manually.\nAuto check runs every 3 minutes."
+        "Bot started in group.\n\nUse /check to check slots manually.\nAuto check runs every 3 minutes."
     )
 
+async def chat_id_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat = update.effective_chat
+
+    await update.message.reply_text(
+        f"Chat ID: {chat.id}\n"
+        f"Chat Type: {chat.type}\n"
+        f"Chat Title: {chat.title}"
+    )
+
+async def check_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Checking slots...")
+
+    try:
+        data, message = run_check()
+        await update.message.reply_text(message)
+    except Exception as e:
+        await update.message.reply_text(f"Error while checking: {e}")
 
 async def check_on_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.strip().lower()
@@ -222,6 +243,8 @@ def main():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("chatid", chat_id_command))
+    app.add_handler(CommandHandler("check", check_command))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, check_on_message))
 
     print("Telegram bot running.", flush=True)
