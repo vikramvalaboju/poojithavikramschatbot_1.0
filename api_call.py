@@ -1,22 +1,19 @@
+import os
 import time
 import threading
 import requests
-from datetime import datetime
 import pytz
-
 from telegram import Update
+from datetime import datetime
 from telegram.ext import ApplicationBuilder, MessageHandler, CommandHandler, ContextTypes, filters
 
 
 # ================= CONFIG =================
 
-BOT_TOKEN = "8767827602:AAG1N_0tP8VcZheGFt8ukGmJG1VI5BWxRPk" 
-CHAT_ID = "1282933223" 
-ACCESS_KEY = "EQYKX8"
-
+BOT_TOKEN = os.getenv("BOT_TOKEN") 
+CHAT_ID = os.getenv("CHAT_ID")
+ACCESS_KEY = os.getenv("ACCESS_KEY")
 CHECKVISA_URL = "https://app.checkvisaslots.com/slots/v3"
-
-# 3 minutes
 POLL_INTERVAL_SECONDS = 180
 
 
