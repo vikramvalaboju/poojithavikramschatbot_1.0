@@ -104,14 +104,15 @@ def format_slots(data):
 
             est_time = utc_time.astimezone(pytz.timezone("US/Eastern"))
             ist_time = utc_time.astimezone(pytz.timezone("Asia/Kolkata"))
-
+            available_date = slot.get("start_date", "N/A")
             msg += (
                 f"📍 {location}\n"
                 f"Slots Available: {slots_available}\n"
+                f"Available Date: {available_date}\n"
                 f"Snapshot EST: {est_time.strftime('%Y-%m-%d %I:%M:%S %p')}\n"
                 f"Snapshot IST: {ist_time.strftime('%Y-%m-%d %I:%M:%S %p')}\n\n"
             )
-
+        
         msg += "Usage Summary\n"
         msg += f"Remaining: {activity.get('remaining')}\n"
         msg += f"Retrieve: {activity.get('retrieve')}\n"
